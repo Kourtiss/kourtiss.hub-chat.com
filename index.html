@@ -3,214 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Chat - Kourtiss' Cult</title>
+    <title>Kourtiss' Cult Chat</title>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #f4f4f4;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        header {
-            background: linear-gradient(45deg, #6a5acd, #8a2be2);
-            color: white;
-            padding: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 32px;
-        }
-
-        .chat-box {
-            width: 100%;
-            max-width: 600px;
-            height: 400px;
-            overflow-y: scroll;
-            background: white;
-            margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .chat-box .message {
-            margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #f0f0f0;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        .chat-box .message span {
-            font-weight: bold;
-            color: #6a5acd;
-        }
-
-        .chat-form {
-            display: flex;
-            width: 100%;
-            max-width: 600px;
-            margin-top: 15px;
-        }
-
-        .chat-form input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            margin-right: 10px;
-            font-size: 16px;
-        }
-
-        .chat-form button {
-            padding: 10px 15px;
-            background: #6a5acd;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .chat-form button:hover {
-            background: #8a2be2;
-        }
-
-        .username-section {
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .username-section input {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        .username-section button {
-            padding: 10px;
-            background: #6a5acd;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-left: 10px;
-            transition: background 0.3s ease;
-        }
-
-        .username-section button:hover {
-            background: #8a2be2;
-        }
-
-        footer {
-            background: #333;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            width: 100%;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+        /* Include your CSS styles here */
     </style>
 </head>
 <body>
+    <header>
+        <h1>Welcome to Kourtiss' Cult Chat!</h1>
+    </header>
 
-<header>Welcome to Kourtiss' Global Chat</header>
+    <!-- Chat Section -->
+    <div class="chat-section">
+        <h2>Chat with Everyone!</h2>
+        <div class="chat-box"></div>
+        <form class="chat-form" onsubmit="sendMessage(event)">
+            <input type="text" placeholder="Type your message..." required>
+            <button type="submit">Send</button>
+        </form>
+    </div>
 
-<div class="username-section">
-    <input type="text" id="usernameInput" placeholder="Enter your username" required>
-    <button onclick="setUsername()">Set Username</button>
-</div>
+    <footer>
+        <p>&copy; 2024 Kourtiss' Cult. <a href="#">Privacy Policy</a></p>
+    </footer>
 
-<div class="chat-box" id="chatBox"></div>
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
 
-<form class="chat-form" onsubmit="sendMessage(event)">
-    <input type="text" id="messageInput" placeholder="Type your message..." required>
-    <button type="submit">Send</button>
-</form>
+    <script>
+        // Import the necessary Firebase functions for Firebase Modular SDK
+        import { initializeApp } from 'firebase/app';
+        import { getFirestore, collection, getDocs, addDoc, orderBy, query, serverTimestamp } from 'firebase/firestore';
 
-<footer>&copy; 2024 Kourtiss' Cult</footer>
+        // Your Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBYB7ckVgU8vayGD18EknMw79UccYQNWFY",
+            authDomain: "kourtiss-chat.firebaseapp.com",
+            projectId: "kourtiss-chat",
+            storageBucket: "kourtiss-chat.firebasestorage.app",
+            messagingSenderId: "610639722559",
+            appId: "1:610639722559:web:05c90913807917a4fde08a",
+            measurementId: "G-EHSS18YG2D"
+        };
 
-<!-- Firebase Scripts -->
-<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-<script>
-    // Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyAGRaMM_tkHi1gC5jxm8O29mq5qoSaX3lA",
-        authDomain: "kourtiss-cult.firebaseapp.com",
-        projectId: "kourtiss-cult",
-        storageBucket: "kourtiss-cult.appspot.com",
-        messagingSenderId: "253397563801",
-        appId: "1:253397563801:web:28c351b1817ee079157b08"
-    };
+        // Function to load messages from Firestore
+        async function loadMessages() {
+            const q = query(collection(db, "messages"), orderBy("timestamp"));
+            const querySnapshot = await getDocs(q);
+            const chatBox = document.querySelector('.chat-box');
+            chatBox.innerHTML = '';  // Clear existing messages
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore(app);
-
-    let username = '';
-
-    function setUsername() {
-        const input = document.getElementById('usernameInput');
-        username = input.value.trim();
-        if (username) {
-            input.disabled = true;
-            input.style.display = 'none';
-            document.querySelector('button').disabled = true;
-            loadMessages(); // Load previous messages once username is set
+            querySnapshot.forEach((doc) => {
+                const message = doc.data();
+                const messageElement = document.createElement('p');
+                messageElement.innerHTML = `<strong>${message.name}:</strong> ${message.text}`;
+                chatBox.appendChild(messageElement);
+            });
         }
-    }
 
-    async function loadMessages() {
-        const chatBox = document.getElementById('chatBox');
-        const messagesSnapshot = await db.collection('messages').orderBy('timestamp').get();
-        chatBox.innerHTML = ''; // Clear previous messages
+        // Function to send a new message
+        async function sendMessage(event) {
+            event.preventDefault();
+            const messageInput = document.querySelector('.chat-form input[type="text"]');
+            const messageText = messageInput.value.trim();
+            if (messageText === '') return;
 
-        messagesSnapshot.forEach(doc => {
-            const message = doc.data();
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-            messageElement.innerHTML = `<span>${message.username}</span>: ${message.text}`;
-            chatBox.appendChild(messageElement);
-        });
+            const userName = "Kourtiss";  // You can customize this with a global user identifier
 
-        // Scroll to the bottom to show the newest messages
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
+            await addDoc(collection(db, "messages"), {
+                name: userName,
+                text: messageText,
+                timestamp: serverTimestamp()
+            });
 
-    async function sendMessage(event) {
-        event.preventDefault();
-        const messageInput = document.getElementById('messageInput');
-        const messageText = messageInput.value.trim();
-        if (messageText === '') return;
+            messageInput.value = ''; // Clear the input field
+            loadMessages(); // Reload messages
+        }
 
-        // Save message to Firestore
-        await db.collection('messages').add({
-            username: username,
-            text: messageText,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        messageInput.value = ''; // Clear the input
-        loadMessages(); // Reload the chat
-    }
-
-    // Load messages in real-time
-    db.collection('messages').orderBy('timestamp').onSnapshot(loadMessages);
-</script>
-
+        // Load initial messages when the page loads
+        document.addEventListener('DOMContentLoaded', loadMessages);
+    </script>
 </body>
 </html>
